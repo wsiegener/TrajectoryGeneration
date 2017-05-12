@@ -52,4 +52,41 @@ public class Util
         return binoCoef(n, v)*Math.pow(s, v)*Math.pow((1-s), n-v);
     }
 
+
+    /**
+     *
+     * @param refTable  Reference table that conversions will be based off of
+     * @param val       Value we need to convert
+     * @param rot       If we are rotating, values can also be negative
+     * @return
+     */
+    public static double lookUp(double[] refTable, double val, boolean rot)
+    {
+        int upper = 0, lower = 0;
+        boolean negative = false;
+
+        if(rot && val < 0.0)
+        {
+            negative = true;
+            val = Math.abs(val);
+        }
+
+
+        for(int i = 0; i < refTable.length-1; i++)
+        {
+            if(refTable[i+1] >= val && refTable[i] <= val)
+            {
+                lower = i;
+                upper = i+1;
+                break;
+            }
+        }
+
+        double ret = (lower/10.0)+((val-refTable[lower])/(refTable[upper]-refTable[lower]))/10.0;
+        if(negative)
+            ret *= -1.0;
+
+        return ret;
+    }
+
 }

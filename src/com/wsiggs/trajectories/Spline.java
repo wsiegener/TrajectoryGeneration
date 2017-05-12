@@ -80,7 +80,7 @@ public class Spline
             sum += Util.bernstein(degree-1, v, s) * velocityPoints[v].getX();
         }
 
-        return sum;
+        return degree*sum;
     }
 
     public double getDY(double s)
@@ -92,7 +92,7 @@ public class Spline
             sum += Util.bernstein(degree-1, v, s) * velocityPoints[v].getY();
         }
 
-        return sum;
+        return degree*sum;
     }
 
     public double getdYdX(double s)
@@ -100,6 +100,10 @@ public class Spline
         return Math.sqrt(Math.pow(getDX(s), 2) + Math.pow(getDY(s), 2));
     }
 
+    public double getRobotVel(double[] refTable, double s)
+    {
+        return Util.lookUp(refTable, getdYdX(s), false);
+    }
 
     public double getH(double s)
     {
@@ -117,5 +121,10 @@ public class Spline
     public double getdHdS(double s)
     {
         return getDH(s)/(s-(s-sIncrement));
+    }
+
+    public double getRobotRot(double[] refTable, double s)
+    {
+        return Util.lookUp(refTable, getdHdS(s), true);
     }
 }

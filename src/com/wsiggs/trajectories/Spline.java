@@ -127,4 +127,9 @@ public class Spline
     {
         return Util.lookUp(refTable, getdHdS(s), true);
     }
+
+    public String getType()
+    {
+        return type;
+    }
 }

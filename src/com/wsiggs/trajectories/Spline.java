@@ -14,9 +14,10 @@ public class Spline
 
     private double sIncrement;
 
-    public Spline(double totalTime, double sIncrement, ReferencePoint[] referencePoints)
+    public Spline(double totalTime, ReferencePoint[] referencePoints)
     {
-        this.sIncrement = sIncrement;
+        this.sIncrement = 1.0/(totalTime * 50.0);
+
         switch (referencePoints.length)
         {
             case 2:
@@ -35,7 +36,6 @@ public class Spline
                 break;
         }
 
-        sIncrement = 1.0/(totalTime * 50.0);
 
         degree = referencePoints.length - 1;
         positionPoints = referencePoints;
@@ -120,7 +120,7 @@ public class Spline
 
     public double getdHdS(double s)
     {
-        return getDH(s)/(s-(s-sIncrement));
+        return getDH(s)/(sIncrement);
     }
 
     public double getRobotRot(double[] refTable, double s)

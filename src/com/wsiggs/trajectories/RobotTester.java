@@ -57,7 +57,7 @@ public class RobotTester extends IterativeRobot
     @Override
     public void teleopPeriodic()
     {
-        if(driverStick.getRawButton(1))
+        if(driverStick.getRawButton(1) && index < path.getSetpoints().size())
         {
             rd.arcadeDrive(path.getSetpoints().get(index).getRobotVel(), path.getSetpoints().get(index).getRobotRot());
             index++;

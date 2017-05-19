@@ -24,17 +24,13 @@ public class Trajectory
             velocityVals[i] *= time;
         }
 
-        for(int i = 0; i < rotationVals.length; i++)
-        {
-            rotationVals[i] *= time;
-        }
 
         this.rotationVals = rotationVals;
         this.velocityVals = velocityVals;
 
-        sIncrement = 1.0/(50.0*time);
-        spline1 = new Spline(time, sIncrement, refPoints);
+        spline1 = new Spline(time, refPoints);
 
+        sIncrement =  1.0/(time * 50.0);
 
         setPoints = new ArrayList<>();
 

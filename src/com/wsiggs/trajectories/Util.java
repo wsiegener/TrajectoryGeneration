@@ -82,7 +82,7 @@ public class Util
             }
         }
 
-        double ret = (lower/10.0)+((val-refTable[lower])/(refTable[upper]-refTable[lower]))/10.0;
+        double ret = -(lower/10.0)+((val-refTable[lower])/(refTable[upper]-refTable[lower]))/10.0;
         if(negative)
             ret *= -1.0;
 

@@ -7,26 +7,16 @@ public class RobotTester extends IterativeRobot
 {
     ReferencePoint r0, r1, r2, r3;
     Trajectory path;
+    Util u;
 
     int index = 0;
 
-    final double[] rotationValues =
-            {
-
-            };
-
-    final double[] velocityValues =
-            {
-
-            };
-
-
     Joystick driverStick;
 
-    SpeedController frontRight;
-    SpeedController rearRight;
-    SpeedController frontLeft;
-    SpeedController rearLeft;
+    CANTalon frontRight;
+    CANTalon rearRight;
+    CANTalon frontLeft;
+    CANTalon rearLeft;
 
     RobotDrive rd;
 
@@ -37,7 +27,7 @@ public class RobotTester extends IterativeRobot
         r2 = new ReferencePoint(3.0, 6.0);
         r3 = new ReferencePoint(6.0, 6.0);
 
-        path = new Trajectory(rotationValues, velocityValues, 5.0, r0, r1, r2, r3);
+        path = new Trajectory(5.0, r0, r1, r2, r3);
 
         driverStick = new Joystick(0);
 
@@ -47,6 +37,12 @@ public class RobotTester extends IterativeRobot
         rearLeft = new CANTalon(4);
 
         rd = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
+
+        frontRight.changeControlMode(CANTalon.TalonControlMode.Speed);
+        frontLeft.changeControlMode(CANTalon.TalonControlMode.Speed);
+        rearRight.changeControlMode(CANTalon.TalonControlMode.Follower);
+        rearLeft.changeControlMode(CANTalon.TalonControlMode.Follower);
+
     }
 
     public void robotInit()
@@ -57,16 +53,23 @@ public class RobotTester extends IterativeRobot
     @Override
     public void teleopPeriodic()
     {
+        Util.DriveState d;
         if(driverStick.getRawButton(1) && index < path.getSetpoints().size())
         {
-            rd.arcadeDrive(path.getSetpoints().get(index).getRobotVel(), path.getSetpoints().get(index).getRobotRot());
+            driveMotors(u.calcKinematics(path.getSetpoints().get(index).getdYdX(), path.getSetpoints().get(index).getdHdS()));
+
+
             index++;
         }
         else
         {
-            rd.arcadeDrive(driverStick.getRawAxis(0), driverStick.getRawAxis(2));
             index = 0;
         }
+    }
+
+
+    public void driveMotors(Util.DriveState d)
+    {
 
     }
 }

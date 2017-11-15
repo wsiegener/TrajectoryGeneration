@@ -10,25 +10,14 @@ public class Trajectory
 {
     private Spline spline1;
     private ArrayList<Setpoint> setPoints;
+    private ReferencePoint[] referencePoints;
     private double sIncrement;
 
-    private double[] rotationVals;
-    private double[] velocityVals;
-
-    private int index = 0;
-
-    public Trajectory(double[] rotationVals, double[] velocityVals, double time, ReferencePoint... refPoints)
+    public Trajectory(double time, ReferencePoint... refPoints)
     {
-        for(int i = 0; i < velocityVals.length; i++)
-        {
-            velocityVals[i] *= time;
-        }
+        referencePoints = refPoints;
 
-
-        this.rotationVals = rotationVals;
-        this.velocityVals = velocityVals;
-
-        spline1 = new Spline(time, refPoints);
+        spline1 = new Spline(time, referencePoints);
 
         sIncrement =  1.0/(time * 50.0);
 
@@ -36,8 +25,11 @@ public class Trajectory
 
         for(double s = 0; s <= 1.0; s += sIncrement)
         {
-            index++;
-            setPoints.add(new Setpoint(s, spline1.getX(s), spline1.getY(s), spline1.getDX(s),  spline1.getDY(s), spline1.getdYdX(s), spline1.getRobotVel(velocityVals, s), spline1.getH(s), spline1.getDH(s), spline1.getdHdS(s), spline1.getRobotRot(rotationVals, s), s*time));
+            setPoints.add(new Setpoint(s, spline1.getX(s), spline1.getY(s),
+                                            spline1.getDX(s),  spline1.getDY(s),
+                                            spline1.getdYdX(s), spline1.getH(s),
+                                            spline1.getDH(s), spline1.getdHdS(s),
+                                            s*time));
         }
     }
 
@@ -50,5 +42,10 @@ public class Trajectory
     public ArrayList<Setpoint> getSetpoints()
     {
         return setPoints;
+    }
+
+    public ReferencePoint[] getReferencePoints()
+    {
+        return referencePoints;
     }
 }

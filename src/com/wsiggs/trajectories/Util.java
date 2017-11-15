@@ -54,39 +54,34 @@ public class Util
 
 
     /**
+     * Calculates the left and right wheel values using inverse kinematics
      *
-     * @param refTable  Reference table that conversions will be based off of
-     * @param val       Value we need to convert
-     * @param rot       If we are rotating, values can also be negative
-     * @return
+     *
      */
-    public static double lookUp(double[] refTable, double val, boolean rot)
+
+    public class DriveState
     {
-        int upper = 0, lower = 0;
-        boolean negative = false;
+        double leftWheel;
+        double rightWheel;
 
-        if(rot && val < 0.0)
+        public DriveState(double leftWheel, double rightWheel)
         {
-            negative = true;
-            val = Math.abs(val);
+            this.leftWheel = leftWheel;
+            this.rightWheel = rightWheel;
         }
-
-
-        for(int i = 0; i < refTable.length-1; i++)
-        {
-            if(refTable[i+1] >= val && refTable[i] <= val)
-            {
-                lower = i;
-                upper = i+1;
-                break;
-            }
-        }
-
-        double ret = -(lower/10.0)+((val-refTable[lower])/(refTable[upper]-refTable[lower]))/10.0;
-        if(negative)
-            ret *= -1.0;
-
-        return ret;
     }
 
+
+    public DriveState calcKinematics(double dX, double dR)
+    {
+        if(dR <= 0.001)
+        {
+            return new DriveState(dX, dX);
+        }
+        else
+        {
+            double delta_v = 30.0 * dR / 2.0;
+            return new DriveState(dX - delta_v, dX + delta_v);
+        }
+    }
 }

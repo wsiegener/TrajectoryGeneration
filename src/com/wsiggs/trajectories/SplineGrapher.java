@@ -3,78 +3,61 @@ package com.wsiggs.trajectories;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Path2D;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
-public class Tester extends JPanel
+public class SplineGrapher extends JPanel
 {
-    private static final double PPI = 2.0;
-    private static final double TRACK_WIDTH = 12.0;
-    private static final int K_WIDTH = 640, K_HEIGHT = 480;
+    // Some global constants for reference
+    public static final double PPI = 2.0; // "Pixels Per Inch" - needs to be scaled once field is overlaid on background
+    public static final double TRACK_WIDTH = 12.0; // 1/2 of the track width of the robot in inches
+    public static final int K_WIDTH = 640, K_HEIGHT = 480; // Height and width of JPanel, will change with field image
 
-    private DraggablePoint[] editPoints =
-            {
-                    new DraggablePoint("p1"),
-                    new DraggablePoint("p2"),
-                    new DraggablePoint("p3"),
-                    new DraggablePoint("p4")
-            };
-
-
-    private static ReferencePoint[] refPoints =
-            {
-                new ReferencePoint(50,50),
-                new ReferencePoint(80,400),
-                new ReferencePoint(200,300),
-                new ReferencePoint(400,250)
-            };
+    // class objects
+    public ArrayList<DraggablePoint> editPoints = new ArrayList<>();
+    public ArrayList<ReferencePoint> refPoints = new ArrayList<>();
 
     public Trajectory traj;
-    public static Tester content;
 
-    public static void main(String[] args)
+    public DecimalFormat df = new DecimalFormat("0.##");
+
+    public SplineGrapher()
     {
+        // Generate some points for example
+        editPoints.add(new DraggablePoint());
+        editPoints.add(new DraggablePoint());
+        editPoints.add(new DraggablePoint());
+        editPoints.add(new DraggablePoint());
 
-        SwingUtilities.invokeLater(() ->
-        {
-            JFrame frame = new JFrame("Splines");
-            frame.setLocationRelativeTo(null);
-            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        refPoints.add(new ReferencePoint(50,50));
+        refPoints.add(new ReferencePoint(80,400));
+        refPoints.add(new ReferencePoint(200,300));
+        refPoints.add(new ReferencePoint(400,250));
 
-            content = new Tester();
-            frame.add(content);
-
-            JButton addPointButton = new JButton();
-            addPointButton.setText("Add Point");
-            addPointButton.addActionListener(e ->
-                    {
-
-                    });
-
-            frame.pack();
-            frame.setVisible(true);
-        });
-    }
-
-    public Tester()
-    {
+        // create trajectory
         traj = new Trajectory(5.0, refPoints);
 
-        Dimension size = new Dimension(640, 480);
+        Dimension size = new Dimension(K_WIDTH, K_HEIGHT);
         setSize(size);
         setPreferredSize(size);
         setLayout(null);
 
-        for(int i = 0; i < refPoints.length; i++)
+        // initialize and add points to the panel
+        for(int i = 0; i < editPoints.size(); i++)
         {
-            initRefPoint(editPoints[i], i);
+            initRefPoint(editPoints.get(i), i);
         }
 
     }
 
+    /**
+     * method from parent JPanel class, called whenever the window is updated
+     *
+     * @param g
+     */
     @Override
     public void paintComponent(Graphics g)
     {
-        System.out.println("paintComp tester");
-
         traj = getUpdatedTrajectory();
 
         Graphics2D g2d = (Graphics2D) g;
@@ -92,6 +75,13 @@ public class Tester extends JPanel
         g2d.draw(generateLeftPath(traj));
         g2d.draw(generateRightPath(traj));
 
+        for(int i = 0; i < editPoints.size(); i++)
+        {
+            g2d.drawString("(" + df.format(editPoints.get(i).getXPositionFeet() - editPoints.get(0).getXPositionFeet()) +
+                            ", " + df.format(editPoints.get(i).getYPositionFeet() - editPoints.get(0).getYPositionFeet()) + ")",
+                            editPoints.get(i).getX() + 10, editPoints.get(i).getY() + 10);
+        }
+
         for(DraggablePoint p : editPoints)
         {
             if(p.isChanged)
@@ -102,6 +92,12 @@ public class Tester extends JPanel
         }
     }
 
+    /**
+     *  Various settings set for the button to make it work
+     *
+     * @param r     Point to be initialized
+     * @param num   index of the point
+     */
     public void initRefPoint(DraggablePoint r, int num)
     {
         r.setOpaque(false);
@@ -109,21 +105,32 @@ public class Tester extends JPanel
         r.setBorderPainted(false);
         r.setFocusPainted(false);
 
-        r.setLocation((int)traj.getReferencePoints()[num].getX(), K_HEIGHT - (int)traj.getReferencePoints()[num].getY());
+        r.setLocation((int)traj.getReferencePoints().get(num).getX(), K_HEIGHT - (int)traj.getReferencePoints().get(num).getY());
         r.setSize(10, 10);
         add(r);
     }
 
+    /**
+     * Regenerates the trajectory with the locations of the draggable points
+     *
+     * @return
+     */
     public Trajectory getUpdatedTrajectory()
     {
-        ReferencePoint[] newRefs = new ReferencePoint[editPoints.length];
-
-        for(int i = 0; i < editPoints.length; i++)
+        for(int i = 0; i < editPoints.size(); i++)
         {
-            newRefs[i] = new ReferencePoint(editPoints[i].getX()-5, K_HEIGHT - editPoints[i].getY() + 5);
+            if(refPoints.get(i) == null)
+            {
+                refPoints.add(new ReferencePoint(editPoints.get(i).getX() - 5,  K_HEIGHT - editPoints.get(i).getY() + 5));
+            }
+            else
+            {
+                refPoints.get(i).setX(editPoints.get(i).getX() - 5);
+                refPoints.get(i).setY(K_HEIGHT - editPoints.get(i).getY() + 5);
+            }
         }
 
-        return new Trajectory(5, newRefs);
+        return new Trajectory(5, refPoints);
     }
 
     public Path2D generateRefPath(Trajectory t)
@@ -131,10 +138,10 @@ public class Tester extends JPanel
         Path2D p = new Path2D.Double();
         double ref_x, ref_y;
 
-        for (int i = 0; i < t.getReferencePoints().length; i++)
+        for (int i = 0; i < t.getReferencePoints().size(); i++)
         {
-            ref_x = 10 + t.getReferencePoints()[i].getX();
-            ref_y = 10 + K_HEIGHT - t.getReferencePoints()[i].getY();
+            ref_x = 10 + t.getReferencePoints().get(i).getX();
+            ref_y = 10 + K_HEIGHT - t.getReferencePoints().get(i).getY();
 
             if (i == 0)
                 p.moveTo(ref_x, ref_y);

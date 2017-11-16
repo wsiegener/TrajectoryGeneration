@@ -10,11 +10,12 @@ public class Trajectory
 {
     private Spline spline1;
     private ArrayList<Setpoint> setPoints;
-    private ReferencePoint[] referencePoints;
+    private ArrayList<ReferencePoint> referencePoints;
     private double sIncrement;
 
-    public Trajectory(double time, ReferencePoint... refPoints)
+    public Trajectory(double time, ArrayList<ReferencePoint> refPoints)
     {
+        referencePoints = new ArrayList<>();
         referencePoints = refPoints;
 
         spline1 = new Spline(time, referencePoints);
@@ -44,7 +45,7 @@ public class Trajectory
         return setPoints;
     }
 
-    public ReferencePoint[] getReferencePoints()
+    public ArrayList<ReferencePoint> getReferencePoints()
     {
         return referencePoints;
     }

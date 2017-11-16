@@ -3,6 +3,8 @@ package com.wsiggs.trajectories;
 import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.*;
 
+import java.util.ArrayList;
+
 public class RobotTester extends IterativeRobot
 {
     ReferencePoint r0, r1, r2, r3;
@@ -20,6 +22,8 @@ public class RobotTester extends IterativeRobot
 
     RobotDrive rd;
 
+    ArrayList<ReferencePoint> referencePoints;
+
     public RobotTester()
     {
         r0 = new ReferencePoint(0.0, 0.0);
@@ -27,7 +31,13 @@ public class RobotTester extends IterativeRobot
         r2 = new ReferencePoint(3.0, 6.0);
         r3 = new ReferencePoint(6.0, 6.0);
 
-        path = new Trajectory(5.0, r0, r1, r2, r3);
+        referencePoints = new ArrayList<>();
+        referencePoints.add(r0);
+        referencePoints.add(r1);
+        referencePoints.add(r2);
+        referencePoints.add(r3);
+
+        path = new Trajectory(5.0, referencePoints);
 
         driverStick = new Joystick(0);
 
@@ -57,7 +67,6 @@ public class RobotTester extends IterativeRobot
         if(driverStick.getRawButton(1) && index < path.getSetpoints().size())
         {
             driveMotors(u.calcKinematics(path.getSetpoints().get(index).getdYdX(), path.getSetpoints().get(index).getdHdS()));
-
 
             index++;
         }
